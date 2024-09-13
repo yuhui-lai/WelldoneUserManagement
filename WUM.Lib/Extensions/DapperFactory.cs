@@ -2,7 +2,7 @@
 using System.Data;
 using WUM.Lib.Interfaces;
 
-namespace WUM.Lib.Configs
+namespace WUM.Lib.Extensions
 {
     public class DapperFactory : ISqlConnectionFactory
     {

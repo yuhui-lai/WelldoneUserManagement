@@ -1,38 +1,54 @@
 ﻿<template>
-    <v-sheet class="d-flex flex-wrap px-4 py-8 mb-4"
-             elevation="4"
-             height="40vh"
-             rounded>
-        <div>
-            <h2 class="text-h4 font-weight-black">使用者列表</h2>
+    <v-container>
+        <v-sheet class="d-flex flex-wrap px-4 py-8 mb-4"
+                 elevation="4"
+                 rounded>
+            <v-form>
+                <v-row class="mb-6">
+                    <v-col cols="12">
+                        <h2 class="text-h5 font-weight-black">使用者列表</h2>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-text-field clearable label="使用者帳號" variant="outlined" style="height:40px; "></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-text-field clearable label="使用者名稱" variant="outlined"></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-select label="狀態" width="150"
+                                  :items="['啟用', '暫停']"></v-select>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-select label="國籍" width="150"></v-select>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-btn prepend-icon="$vuetify" elevation="4" class="mr-4">
+                            查詢
+                        </v-btn>
+                        <v-btn prepend-icon="$vuetify" elevation="4">
+                            清除
+                        </v-btn>
+                    </v-col>
+                </v-row>
+            </v-form>
+        </v-sheet>
 
-            <v-text-field clearable label="用戶名" variant="outlined" width="60vw" class="mt-4"></v-text-field>
-            <v-select label="狀態"
-                      :items="['啟用', '暫停']"></v-select>
-            <v-text-field clearable label="電子郵件" variant="outlined"></v-text-field>
+        <v-sheet class="d-flex flex-wrap px-4 py-8 mb-4"
+                 elevation="4"
+                 height="40vh"
+                 rounded>
+            <v-data-table :headers="tableHeader" :items="userinfos" :search="searchKey" item-key="id" :loading="loading">
+                <template v-slot:item.edit="{ item }">
+                    <v-btn color="primary" rounded>修改</v-btn>
+                </template>
+                <template v-slot:item.delete="{ item }">
+                    <v-btn color="error" rounded>刪除</v-btn>
+                </template>
+            </v-data-table>
+        </v-sheet>
+    </v-container>
 
-            <v-btn prepend-icon="$vuetify" elevation="4" class="mr-4">
-                查詢
-            </v-btn>
-            <v-btn prepend-icon="$vuetify" elevation="4">
-                清除
-            </v-btn>
-        </div>
-    </v-sheet>
 
-    <v-sheet class="d-flex flex-wrap px-4 py-8 mb-4"
-             elevation="4"
-             height="40vh"
-             rounded>
-        <v-data-table :headers="tableHeader" :items="userinfos" :search="searchKey" item-key="id" :loading="loading">
-            <template v-slot:item.edit="{ item }">
-                <v-btn color="primary" rounded>修改</v-btn>
-            </template>
-            <template v-slot:item.delete="{ item }">
-                <v-btn color="error" rounded>刪除</v-btn>
-            </template>
-        </v-data-table>
-    </v-sheet>
 </template>
 
 <script lang="js">

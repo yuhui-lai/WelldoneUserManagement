@@ -24,7 +24,7 @@ namespace WelldoneUserManagement.Server.Controllers
         public async Task<IActionResult> PasswordLogin(PasswordLoginReq req)
         {
             var res = await authService.PasswordLogin(req);
-            if (res.Success)
+            if (res!=null && res.Success)
             {
                 return Ok(res);
             }

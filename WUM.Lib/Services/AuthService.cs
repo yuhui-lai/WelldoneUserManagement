@@ -7,6 +7,8 @@ using WUM.Lib.Interfaces;
 using WUM.Lib.Models.Auth;
 using WUM.Lib.Models.Common;
 using WUM.Lib.Models.JWT;
+using WUM.Lib.Models.LogModel;
+using WUM.Lib.Utilities;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace WUM.Lib.Services
@@ -33,73 +35,79 @@ namespace WUM.Lib.Services
 
         public async Task<CommonAPIModel<LoginRes>> PasswordLogin(PasswordLoginReq req)
         {
-            string loginApi = config["WelldoneAuth:PasswordLoginAPI"];
+            string msg = "";
+            if (!ChkLoginReq(req))
+            {
+                msg = "帳號或密碼空白";
+                return LoginErrorResponse(msg);
+            }
 
+            string loginApi = config["WelldoneAuth:PasswordLoginAPI"];
             var reqJson = new StringContent(
                 JsonSerializer.Serialize(req),
                 Encoding.UTF8,
                 Application.Json);
-
             var httpClient = httpClientFactory.CreateClient();
             var httpResMsg = await httpClient.PostAsync(loginApi, reqJson);
-
-            if (httpResMsg.IsSuccessStatusCode)
+            if (!httpResMsg.IsSuccessStatusCode)
             {
-                string httpJson = await httpResMsg.Content.ReadAsStringAsync();
-                var wdAuthRes = JsonSerializer.Deserialize<WelldoneAuthPasswordLoginRes>(httpJson);
-
-                var jwtRes = GetJwt();
-                if (jwtRes.isSuccess)
-                {
-                    return new CommonAPIModel<LoginRes>
-                    {
-                        Msg = "登入成功",
-                        Data = new LoginRes
-                        {
-                            DisplayName = wdAuthRes.Data.DisplayName,
-                            Token = jwtRes.jwt
-                        }
-                    };
-                }
-                return new CommonAPIModel<LoginRes>
-                {
-                    Success = false,
-                    Msg = "token產生失敗",
-                    Data = new LoginRes()
-                };
+                msg = "帳密錯誤";
+                logger.LogInformation($"PasswordLogin(): {msg}");
+                return LoginErrorResponse(msg);
             }
+            string httpJson = await httpResMsg.Content.ReadAsStringAsync();
+            var wdAuthRes = JsonSerializer.Deserialize<WelldoneAuthPasswordLoginRes>(httpJson);
+
+            var jwtRes = GetJwt();
+            if (!jwtRes.isSuccess)
+            {
+                msg = "token產生失敗";
+                logger.LogInformation($"PasswordLogin(): {msg}");
+                return LoginErrorResponse(msg);
+            }
+
+            msg = "登入成功";
+            // 寫log
+            await LoginSuccLog(msg, req.Username, "AuthService PasswordLogin()");
             return new CommonAPIModel<LoginRes>
             {
-                Success = false,
-                Msg = "帳密錯誤",
-                Data = new LoginRes()
+                Msg = msg,
+                Data = new LoginRes
+                {
+                    DisplayName = wdAuthRes.Data.DisplayName,
+                    Token = jwtRes.jwt
+                }
             };
         }
 
         public async Task<CommonAPIModel<QrcodeLoginPrepareRes>> QrcodeLoginPrepare()
         {
-            string qrcodeLoginPrepareApi = config["WelldoneAuth:QrcodeLoginPrepareAPI"];
+            string msg = "Qrcode產生成功";
 
+            string qrcodeLoginPrepareApi = config["WelldoneAuth:QrcodeLoginPrepareAPI"];
             var reqJson = new StringContent(
                 JsonSerializer.Serialize(""),
                 Encoding.UTF8,
                 Application.Json);
-
             var httpClient = httpClientFactory.CreateClient();
             var httpResMsg = await httpClient.PostAsync(qrcodeLoginPrepareApi, reqJson);
             if (httpResMsg.IsSuccessStatusCode)
             {
                 string httpJson = await httpResMsg.Content.ReadAsStringAsync();
                 var wdAuthRes = JsonSerializer.Deserialize<WelldoneAuthQrcodeLoginPrepareRes>(httpJson);
-
+                logger.LogInformation($"QrcodeLoginPrepare(): {msg}");
                 return new CommonAPIModel<QrcodeLoginPrepareRes>
                 {
+                    Msg = msg,
                     Data = new QrcodeLoginPrepareRes
                     {
                         QrcodeGuid = wdAuthRes.Data.QrcodeGuid,
                     }
                 };
             }
+
+            msg = "Qrcode產生失敗";
+            logger.LogInformation($"QrcodeLoginPrepare(): {msg}");
             return new CommonAPIModel<QrcodeLoginPrepareRes>
             {
                 Success = false,
@@ -109,6 +117,7 @@ namespace WUM.Lib.Services
 
         public async Task<CommonAPIModel<LoginRes>> QrcodeLogin(QrcodeLoginReq req)
         {
+            string msg = "";
             string qrcodeLoginApi = config["WelldoneAuth:QrcodeLoginAPI"];
 
             var reqJson = new StringContent(
@@ -126,6 +135,9 @@ namespace WUM.Lib.Services
                 var jwtRes = GetJwt();
                 if (jwtRes.isSuccess)
                 {
+                    msg = "登入成功";
+                    // 寫log
+                    await LoginSuccLog(msg, wdAuthRes.Data.DisplayName, "AuthService QrcodeLogin()");
                     return new CommonAPIModel<LoginRes>
                     {
                         Data = new LoginRes
@@ -136,11 +148,9 @@ namespace WUM.Lib.Services
                     };
                 }
             }
-            return new CommonAPIModel<LoginRes>
-            {
-                Success = false,
-                Data = new LoginRes()
-            };
+            msg = "登入失敗";
+            logger.LogInformation($"QrcodeLogin(): {msg}");
+            return LoginErrorResponse(msg);
         }
 
         private RunStatus GetJwt()
@@ -154,6 +164,33 @@ namespace WUM.Lib.Services
             return jwtServices.GetJWT(jwtCliam, key, iss);
         }
 
+        private bool ChkLoginReq(PasswordLoginReq req)
+        {
+            return !string.IsNullOrEmpty(req.Username) && !string.IsNullOrEmpty(req.Password);
+        }
 
+        private CommonAPIModel<LoginRes> LoginErrorResponse(string msg)
+        {
+            return new CommonAPIModel<LoginRes>
+            {
+                Success = false,
+                Msg = msg,
+                Data = new LoginRes()
+            };
+        }
+
+        private async Task LoginSuccLog(string msg, string userId, string source)
+        {
+            // 寫log
+            using var conn = dapper.CreateConnection();
+            WelldoneLog log = new WelldoneLog
+            {
+                LogDate = TimeUtil.UtcNow(),
+                LogMsg = msg,
+                UserId = userId,
+                LogSource = source
+            };
+            await LogUtil.Save(conn, log);
+        }
     }
 }

@@ -1,10 +1,11 @@
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
+using WUM.Lib.Extensions;
+using WUM.Lib.Filters;
 using WUM.Lib.Interfaces;
 using WUM.Lib.Services;
-using WUM.Lib.Configs;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +13,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<JWTBase, JWTServices>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserInfoService, UserInfoService>();
+//builder.Services.AddScoped<ApiLogFilter>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    //options.Filters.Add<ApiLogFilter>();
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -78,6 +83,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+    app.UseWelldoneExceptHandler(loggerFactory);
 }
 
 app.UseHttpsRedirection();

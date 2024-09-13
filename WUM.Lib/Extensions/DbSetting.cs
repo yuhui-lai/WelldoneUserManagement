@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using WUM.Lib.Interfaces;
 
-namespace WUM.Lib.Configs
+namespace WUM.Lib.Extensions
 {
     public static class DbSetting
     {

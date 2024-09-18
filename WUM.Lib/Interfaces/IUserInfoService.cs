@@ -10,6 +10,7 @@ namespace WUM.Lib.Interfaces
 {
     public interface IUserInfoService
     {
-        Task<CommonAPIModel<List<UserInfoVM>>> GetUserInfos(string username = "", string email = "");
+        Task<CommonAPIModel<List<UserInfoRowVM>>> GetUserInfos();
+        Task<CommonAPIModel<string>> CreateUser(UserCreateReq req);
     }
 }

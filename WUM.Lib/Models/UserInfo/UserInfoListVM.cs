@@ -8,6 +8,6 @@ namespace WUM.Lib.Models.UserInfo
 {
     public class UserInfoListVM
     {
-        public List<UserInfoVM> UserInfos { get; set; }
+        public List<UserInfoRowVM> UserInfos { get; set; }
     }
 }

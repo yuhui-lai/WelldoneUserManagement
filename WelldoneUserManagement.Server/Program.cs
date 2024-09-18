@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using WUM.Lib.Extensions;
-using WUM.Lib.Filters;
 using WUM.Lib.Interfaces;
 using WUM.Lib.Services;
 
@@ -13,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<JWTBase, JWTServices>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserInfoService, UserInfoService>();
+builder.Services.AddScoped<ICountryService, CountryService>();
 //builder.Services.AddScoped<ApiLogFilter>();
 
 builder.Services.AddControllers(options =>

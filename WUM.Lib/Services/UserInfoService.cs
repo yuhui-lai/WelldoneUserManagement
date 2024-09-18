@@ -10,62 +10,73 @@ using System.Threading.Tasks;
 using WUM.Lib.Interfaces;
 using WUM.Lib.Models.Common;
 using WUM.Lib.Models.UserInfo;
+using WUM.Lib.Utilities;
 
 namespace WUM.Lib.Services
 {
     public class UserInfoService : IUserInfoService
     {
         private readonly ISqlConnectionFactory dapper;
-        private readonly HtmlEncoder htmlEncoder;
+        private readonly HtmlEncoder encoder;
         private readonly ILogger<UserInfoService> logger;
 
-        public UserInfoService(ISqlConnectionFactory dapper, HtmlEncoder htmlEncoder, ILogger<UserInfoService> logger) 
+        public UserInfoService(ISqlConnectionFactory dapper, HtmlEncoder encoder, ILogger<UserInfoService> logger) 
         {
             this.dapper = dapper;
-            this.htmlEncoder = htmlEncoder;
+            this.encoder = encoder;
             this.logger = logger;
         }
 
-        public async Task<CommonAPIModel<List<UserInfoVM>>> GetUserInfos(string username, string email)
+        public async Task<CommonAPIModel<List<UserInfoRowVM>>> GetUserInfos()
         {
-            try
+            return new CommonAPIModel<List<UserInfoRowVM>>
             {
-                string cUser = htmlEncoder.Encode(username.Trim());
-                string cEmail = htmlEncoder.Encode(email.Trim());
-                var param = new DynamicParameters();
-                string qSql = " SELECT * " +
-                                " FROM UserInfo " +
-                                " WHERE 1=1 ";
+                Data = GetFakeUserInfos()
+            };
+        }
 
-                if (!cUser.IsNullOrEmpty())
-                {
-                    qSql += " AND Username = @Username ";
-                    param.Add("Username", cUser);
-                }
-                if (!cEmail.IsNullOrEmpty())
-                {
-                    qSql += " AND Email = @Email ";
-                    param.Add("Email", cEmail);
-                }
+        public async Task<CommonAPIModel<string>> CreateUser(UserCreateReq req)
+        {
+            string cUser = req.Username.Purify(encoder);
+            string cName = req.DisplayName.Purify(encoder);
+            string cPass = req.Password.Purify(encoder);
+            string cEmail = req.Email.Purify(encoder);
 
-                using var conn = dapper.CreateConnection();
-                var userInfos = (await conn.QueryAsync<UserInfoVM>(qSql, param)).ToList();
-
-                return new CommonAPIModel<List<UserInfoVM>>
-                {
-                    Data = userInfos
-                };
-            }
-            catch (Exception ex) 
+            return new CommonAPIModel<string>
             {
-                logger.LogError($"GetUserInfos: {ex.Message}");
-                return new CommonAPIModel<List<UserInfoVM>>
-                {
-                    Success = false,
-                    Msg = "系統忙碌中",
-                    Data = new List<UserInfoVM>()
-                };
-            }
+                Msg = "新增成功",
+                Data = $"{cUser}, {cName}, {cPass}, {cEmail}"
+            };
+        }
+
+        private List<UserInfoRowVM> GetFakeUserInfos()
+        {
+            UserInfoRowVM r1 = new()
+            {
+                Id = 1,
+                Username = "marco@welldone.com.tw",
+                Displayname = "marco",
+                Status = true,
+            };
+            UserInfoRowVM r2 = new()
+            {
+                Id = 2,
+                Username = "jennifer@welldone.com.tw",
+                Displayname = "jennifer",
+                Status = true,
+            };
+            UserInfoRowVM r3 = new()
+            {
+                Id = 3,
+                Username = "yuhui@welldone.com.tw",
+                Displayname = "賴育暉",
+                Status = false,
+            };
+            List<UserInfoRowVM> infos = new List<UserInfoRowVM>();
+            infos.Add(r1);
+            infos.Add(r2);
+            infos.Add(r3);
+            return infos;
         }
     }
 }

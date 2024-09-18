@@ -6,17 +6,17 @@
                          type="error"
                          dismissible
                          max-width="450"
-                         min-width="400"
+                         min-width="390"
                          class="elevation-12 pa-4 mx-auto"
                          rounded="lg">
                     {{ errorMessage }}
                 </v-alert>
-                <v-card class="elevation-12 pa-8 mx-auto" rounded="lg" max-width="450" min-width="400">
+                <v-card class="elevation-12 pa-8 mx-auto" rounded="lg" max-width="450" min-width="390">
                     <v-card-title class="text-h6 font-weight-bold justify-center mb-4 text-wrap text-center">
                         Welldone 使用者及權限管理系統
                     </v-card-title>
                     <v-card-text>
-                        <v-form @submit.prevent="Login">
+                        <v-form ref="form" @submit.prevent="PasswordLogin">
                             <div v-if="isPasswordLogin">
                                 <v-text-field v-model="account"
                                               label="username"
@@ -24,7 +24,8 @@
                                               type="email"
                                               required
                                               variant="outlined"
-                                              class="mb-4"></v-text-field>
+                                              class="mb-4"
+                                              :rules="usernameRule"></v-text-field>
                                 <v-text-field v-model="password"
                                               label="password"
                                               prepend-inner-icon="mdi-lock"
@@ -32,7 +33,8 @@
                                               required
                                               variant="outlined"
                                               :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                                              @click:append-inner="showPassword = !showPassword"></v-text-field>
+                                              @click:append-inner="showPassword = !showPassword"
+                                              :rules="passwordRule"></v-text-field>
 
                                 <v-btn type="submit"
                                        color="primary"
@@ -54,15 +56,24 @@
                                 </v-btn>
                             </div>
                             <div v-else>
-                                <div class="d-flex align-center justify-center">
+                                <div v-if="error"
+                                     class="d-flex align-center justify-center">
+                                    <v-btn color="error"
+                                           class="mt-4"
+                                           prepend-icon="mdi-refresh"
+                                           @click="SwitchQrcodeLogin">
+                                        重新產生Qrcode
+                                    </v-btn>
+                                </div>
+                                <div v-else
+                                     class="d-flex align-center justify-center">
                                     <div id="qrcodeLoading-div" v-if="qrcodeLoading" class="d-flex align-center justify-center">
-                                        <v-progress-circular
-                                                             color="primary"
+                                        <v-progress-circular color="primary"
                                                              :size="50"
                                                              :width="7"
                                                              indeterminate></v-progress-circular>
                                     </div>
-                                    
+
                                     <vue-qr v-else :text="qrcodeImgSrc" :size="200"></vue-qr>
                                 </div>
                                 <v-btn color="background"
@@ -99,9 +110,8 @@
         },
         data() {
             return {
-                // api
-                loginApi: 'api/Auth/PasswordLogin',
                 // 帳密登入
+                loginApi: 'api/Auth/PasswordLogin',
                 account: '',
                 password: '',
                 showPassword: false,
@@ -109,6 +119,8 @@
                 error: false,
                 errorMessage: '',
                 isPasswordLogin: true,
+                usernameRule: [v => !!v || '必填'],
+                passwordRule: [v => !!v || '必填'],
                 // qrcode登入
                 qrcodeLoginPrepareApi: 'api/Auth/QrcodeLoginPrepare',
                 qrcodeLoginApi: 'api/Auth/QrcodeLogin',
@@ -119,7 +131,11 @@
         mounted() {
         },
         methods: {
-            Login() {
+            // 帳密登入
+            async PasswordLogin() {
+                const { valid } = await this.$refs.form.validate();
+                if (!valid)
+                    return;
                 this.loading = true;
                 this.error = false;
 
@@ -156,21 +172,23 @@
                         return;
                     });
             },
-
+            // 登入存cookie
             LoginCookie(token) {
                 Cookies.set('login-token', token, { expires: 1 });
             },
-
+            // 切換至Qrcode登入
             SwitchQrcodeLogin() {
                 this.isPasswordLogin = false;
+                this.qrcodeImgSrc = '';
                 this.QrcodeLoginPrepare();
             },
-
+            // 切換至帳密登入
             SwitchPasswordLogin() {
                 this.isPasswordLogin = true;
             },
-
+            // Qrcode登入準備
             QrcodeLoginPrepare() {
+                this.error = false;
                 this.qrcodeLoading = true;
                 fetch(this.qrcodeLoginPrepareApi, {
                     method: "POST"
@@ -195,7 +213,7 @@
                         console.log(error);
                     });
             },
-
+            // 訂閱Qrcode登入SSE
             QrSse(guid) {
                 console.log(`VITE_QRCODE_LOGIN_SSE:${import.meta.env.VITE_QRCODE_LOGIN_SSE}`);
                 let source = new EventSource(`${import.meta.env.VITE_QRCODE_LOGIN_SSE}/${guid}`);
@@ -207,8 +225,9 @@
                     console.log(`e.data: ${e.data}`);
                 });
             },
-
-            QrcodeLogin(guid, tempToken) {                
+            // Qrcode登入
+            QrcodeLogin(guid, tempToken) {      
+                this.error = false;
                 let headers = {
                     "Content-Type": "application/json",
                     "Accept": "application/json"

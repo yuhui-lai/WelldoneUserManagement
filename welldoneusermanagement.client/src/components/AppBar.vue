@@ -1,7 +1,7 @@
 ﻿<template>
     <v-app-bar color="primary" prominent>
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-toolbar-title>Application bar</v-toolbar-title>
+        <v-toolbar-title>使用者權限及管理系統</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon="mdi-dots-vertical" variant="text"></v-btn>
     </v-app-bar>

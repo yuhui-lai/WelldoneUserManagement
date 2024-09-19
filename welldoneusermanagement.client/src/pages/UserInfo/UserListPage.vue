@@ -1,37 +1,64 @@
 ﻿<template>
-    <v-container width="80vw">
-        <v-sheet class="d-flex flex-wrap px-4 py-8 mb-4"
+    <v-container width="100vw">
+        <v-sheet class="flex-wrap px-4 py-8 mb-4"
                  elevation="4"
                  rounded>
             <v-form>
-                <v-row class="">
-                    <v-col cols="12">
-                        <h2 class="text-h4 font-weight-black">使用者列表</h2>
+                <v-row>
+                    <v-col>
+                        <h1 class="font-weight-black">使用者列表</h1>
                     </v-col>
-                    <v-col cols="12">
+                </v-row>
+                <v-row>
+                    <v-col cols="4" class="text-right">
+                        <p class="text-h6 font-weight-medium">
+                            使用者帳號
+                        </p>
+                    </v-col>
+                    <v-col cols="6">
                         <v-text-field class="search-block-row"
                                       clearable
-                                      label="使用者帳號"
                                       variant="outlined"></v-text-field>
                     </v-col>
-                    <v-col cols="12">
-                        <v-text-field class="search-block-row"
-                                      clearable label="使用者名稱"
-                                      variant="outlined"
-                                      style="height:50px;"></v-text-field>
+                </v-row>
+                <v-row>
+                    <v-col cols="4" class="text-right">
+                        <p class="text-h6 font-weight-medium">
+                            使用者名稱
+                        </p>
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="6">
+                        <v-text-field class="search-block-row"
+                                      clearable
+                                      variant="outlined"></v-text-field>
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="4" class="text-right">
+                        <p class="text-h6 font-weight-medium">
+                            狀態
+                        </p>
+                    </v-col>
+                    <v-col cols="6">
                         <v-select class="search-block-select-row"
-                                  label="狀態"
-                                  width="150"
                                   :items="['啟用', '暫停']"></v-select>
                     </v-col>
-                    <v-col cols="12">
-                        <v-select class="search-block-select-row"
-                                  label="國籍"
-                                  width="150"></v-select>
+                </v-row>
+                <v-row>
+                    <v-col cols="4" class="text-right">
+                        <p class="text-h6 font-weight-medium">
+                            國籍</p>
                     </v-col>
-                    <v-col cols="12" class="search-block-row">
+                    <v-col cols="6">
+                        <VueSelect v-model="country"
+                                   :options="countryList"/>
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="4" class="text-right">
+                        <p class="text-h6 font-weight-medium"></p>
+                    </v-col>
+                    <v-col cols="8" class="search-block-row">
                         <v-btn prepend-icon="mdi-magnify"
                                elevation="4"
                                class="mr-4">
@@ -79,12 +106,7 @@
                 </template>
             </v-data-table>
         </v-sheet>
-
         <UserCreateDialog v-if="isCreateDialogVisible" @close="CloseUserCreateDialog" />
-            
-            <!--v-model="create_dialog"
-                      @update:modelValue="CloseUserCreateDialog"-->
-        
     </v-container>
     
 
@@ -94,10 +116,12 @@
     import { defineComponent } from 'vue';
     import Cookies from 'js-cookie';
     import UserCreateDialog from '@/components/UserInfo/UserCreateDialog.vue';
+    import VueSelect from "vue3-select-component";
 
     export default defineComponent({
         components: {
-            UserCreateDialog
+            UserCreateDialog,
+            VueSelect
         },
         directives: {
         },
@@ -110,6 +134,7 @@
             return {
                 loading: false,
                 userInfoApi: '/api/UserInfo',
+                getCountriesApi: '/api/Country',
                 userinfos: [],
 
                 tableHeader: [
@@ -122,7 +147,9 @@
                 ],
 
                 searchKey: '',
-                isCreateDialogVisible: false
+                isCreateDialogVisible: false,
+                country: '',
+                countryList: [],
             }
         },
         computed: {
@@ -136,6 +163,7 @@
         beforeMount() {
         },
         mounted() {
+            this.GetCountries();
             this.GetUserInfos();
         },
         updated() {
@@ -196,6 +224,27 @@
                     Cookies.remove(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
                     this.$router.push('/')
                 }
+            },
+
+            GetCountries() {
+                this.showAlert = false;
+                this.loading = true;
+                fetch(this.getCountriesApi, {
+                    method: "GET",
+                })
+                    .then(r => {
+                        if (!r.ok) {
+                            throw Error(`${r.status}@${r.statusText}`);
+                        }
+                        return r.json();
+                    })
+                    .then(json => {
+                        this.countryList = json.data;
+                        this.loading = false;
+                        return;
+                    }).catch(error => {
+                        this.FetchErrorHandle(error);
+                    });
             }
         },
     });

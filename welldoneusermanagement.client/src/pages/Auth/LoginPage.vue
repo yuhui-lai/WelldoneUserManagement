@@ -129,6 +129,7 @@
             }
         },
         mounted() {
+            console.log(`ENV: ${import.meta.env.VITE_ENV}`);
         },
         methods: {
             // 帳密登入

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WUM.Lib.Models.Common;
 
-namespace WelldoneUserManagement.Server.Controllers
+namespace WUM.Server.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
@@ -10,7 +10,7 @@ namespace WelldoneUserManagement.Server.Controllers
     {
         private readonly IConfiguration config;
 
-        public TestController(IConfiguration config) 
+        public TestController(IConfiguration config)
         {
             this.config = config;
         }
@@ -20,7 +20,7 @@ namespace WelldoneUserManagement.Server.Controllers
         {
             string env = config["Env"];
 
-            var res = new CommonAPIModel<string>
+            var res = new CommAPIModel<string>
             {
                 Data = env
             };

@@ -1,6 +1,6 @@
 ﻿namespace WUM.Lib.Models.Common
 {
-    public class CommonAPIModel<T>
+    public class CommAPIModel<T>
     {
         /// <summary>
         /// api狀態

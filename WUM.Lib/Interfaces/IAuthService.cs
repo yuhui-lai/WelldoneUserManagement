@@ -5,9 +5,9 @@ namespace WUM.Lib.Interfaces
 {
     public interface IAuthService
     {
-        Task<CommonAPIModel<LoginRes>> PasswordLogin(PasswordLoginReq req);
-        Task<CommonAPIModel<QrcodeLoginPrepareRes>> QrcodeLoginPrepare();
-        Task<CommonAPIModel<LoginRes>> QrcodeLogin(QrcodeLoginReq req);
+        Task<CommAPIModel<LoginRes>> PasswordLogin(PasswordLoginReq req);
+        Task<CommAPIModel<QrcodeLoginPrepareRes>> QrcodeLoginPrepare();
+        Task<CommAPIModel<LoginRes>> QrcodeLogin(QrcodeLoginReq req);
         
     }
 }

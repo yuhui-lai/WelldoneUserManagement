@@ -3,7 +3,7 @@ using WUM.Lib.Interfaces;
 using WUM.Lib.Models.Auth;
 using WUM.Lib.Services;
 
-namespace WelldoneUserManagement.Server.Controllers
+namespace WUM.Server.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

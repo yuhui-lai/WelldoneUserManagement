@@ -33,7 +33,7 @@ namespace WUM.Lib.Services
             this.httpClientFactory=httpClientFactory;
         }
 
-        public async Task<CommonAPIModel<LoginRes>> PasswordLogin(PasswordLoginReq req)
+        public async Task<CommAPIModel<LoginRes>> PasswordLogin(PasswordLoginReq req)
         {
             string msg = "";
             if (!ChkLoginReq(req))
@@ -69,7 +69,7 @@ namespace WUM.Lib.Services
             msg = "登入成功";
             // 寫log
             await LoginSuccLog(msg, req.Username, "AuthService PasswordLogin()");
-            return new CommonAPIModel<LoginRes>
+            return new CommAPIModel<LoginRes>
             {
                 Msg = msg,
                 Data = new LoginRes
@@ -80,7 +80,7 @@ namespace WUM.Lib.Services
             };
         }
 
-        public async Task<CommonAPIModel<QrcodeLoginPrepareRes>> QrcodeLoginPrepare()
+        public async Task<CommAPIModel<QrcodeLoginPrepareRes>> QrcodeLoginPrepare()
         {
             string msg = "Qrcode產生成功";
 
@@ -96,7 +96,7 @@ namespace WUM.Lib.Services
                 string httpJson = await httpResMsg.Content.ReadAsStringAsync();
                 var wdAuthRes = JsonSerializer.Deserialize<WelldoneAuthQrcodeLoginPrepareRes>(httpJson);
                 logger.LogInformation($"QrcodeLoginPrepare(): {msg}");
-                return new CommonAPIModel<QrcodeLoginPrepareRes>
+                return new CommAPIModel<QrcodeLoginPrepareRes>
                 {
                     Msg = msg,
                     Data = new QrcodeLoginPrepareRes
@@ -108,14 +108,14 @@ namespace WUM.Lib.Services
 
             msg = "Qrcode產生失敗";
             logger.LogInformation($"QrcodeLoginPrepare(): {msg}");
-            return new CommonAPIModel<QrcodeLoginPrepareRes>
+            return new CommAPIModel<QrcodeLoginPrepareRes>
             {
                 Success = false,
                 Data = new QrcodeLoginPrepareRes()
             };
         }
 
-        public async Task<CommonAPIModel<LoginRes>> QrcodeLogin(QrcodeLoginReq req)
+        public async Task<CommAPIModel<LoginRes>> QrcodeLogin(QrcodeLoginReq req)
         {
             string msg = "";
             string qrcodeLoginApi = config["WelldoneAuth:QrcodeLoginAPI"];
@@ -138,7 +138,7 @@ namespace WUM.Lib.Services
                     msg = "登入成功";
                     // 寫log
                     await LoginSuccLog(msg, wdAuthRes.Data.DisplayName, "AuthService QrcodeLogin()");
-                    return new CommonAPIModel<LoginRes>
+                    return new CommAPIModel<LoginRes>
                     {
                         Data = new LoginRes
                         {
@@ -169,9 +169,9 @@ namespace WUM.Lib.Services
             return !string.IsNullOrEmpty(req.Username) && !string.IsNullOrEmpty(req.Password);
         }
 
-        private CommonAPIModel<LoginRes> LoginErrorResponse(string msg)
+        private CommAPIModel<LoginRes> LoginErrorResponse(string msg)
         {
-            return new CommonAPIModel<LoginRes>
+            return new CommAPIModel<LoginRes>
             {
                 Success = false,
                 Msg = msg,

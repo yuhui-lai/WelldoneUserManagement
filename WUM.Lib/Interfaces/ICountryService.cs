@@ -10,6 +10,6 @@ namespace WUM.Lib.Interfaces
 {
     public interface ICountryService
     {
-        CommonAPIModel<List<CountrySelectOption>> GetCountries();
+        CommAPIModel<List<CountrySelectOption>> GetCountries();
     }
 }

@@ -24,7 +24,7 @@ namespace WUM.Lib.Extensions
 
                     context.Response.ContentType = "application/json";
                     context.Response.StatusCode = 500;
-                    var result = JsonSerializer.Serialize(new CommonAPIModel<string>
+                    var result = JsonSerializer.Serialize(new CommAPIModel<string>
                     {
                         Success = false,
                         Msg = "系統忙碌中，請稍後重試",

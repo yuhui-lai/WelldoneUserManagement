@@ -154,23 +154,25 @@
                     headers: headers,
                     body: JSON.stringify(body)
                 })
-                    .then(r => r.json())
-                    .then(json => {
-                        if (json.success) {
-                            let token = json.data.token;
-                            //console.log(`token: ${token}`);
-                            this.error = false;
-                            this.LoginCookie(token);
-                            if(Cookies.get('login-token')){
-                                this.$router.push('/userlist')
-                            }
+                    .then(r => {
+                        if (!r.ok) {
+                            throw Error(`${r.status}@${r.statusText}`);
                         }
-                        else {
-                            this.error = true;
-                            this.errorMessage = '登入失敗，請檢查您的帳號和密碼。';
+                        return r.json();
+                    })
+                    .then(json => {
+                        let token = json.data.token;
+                        //console.log(`token: ${token}`);
+                        this.error = false;
+                        this.LoginCookie(token);
+                        if (Cookies.get('login-token')) {
+                            this.$router.push('/userlist')
                         }
                         this.loading = false;
                         return;
+                    })
+                    .catch(error => {
+                        this.FetchErrorHandle(error);
                     });
             },
             // 登入存cookie
@@ -194,24 +196,21 @@
                 fetch(this.qrcodeLoginPrepareApi, {
                     method: "POST"
                 })
-                    .then(r => r.json())
-                    .then(json => {
-                        if (json.success) {
-                            console.log(`qrcodeGuid: ${json.data.qrcodeGuid}`);
-                            this.qrcodeImgSrc = json.data.qrcodeGuid;
-                            this.qrcodeLoading = false;
-                            const guid = this.qrcodeImgSrc.split(':')[1];
-                            this.QrSse(guid);
+                    .then(r => {
+                        if (!r.ok) {
+                            throw Error(`${r.status}@${r.statusText}`);
                         }
-                        else {
-                            this.error = true;
-                            this.errorMessage = '登入失敗';
-                        }
+                        return r.json();
                     })
-                    .catch((error) => {
-                        this.error = true;
-                        this.errorMessage = '登入失敗';
-                        console.log(error);
+                    .then(json => {
+                        //console.log(`qrcodeGuid: ${json.data.qrcodeGuid}`);
+                        this.qrcodeImgSrc = json.data.qrcodeGuid;
+                        this.qrcodeLoading = false;
+                        const guid = this.qrcodeImgSrc.split(':')[1];
+                        this.QrSse(guid);
+                    })
+                    .catch(error => {
+                        this.FetchErrorHandle(error);
                     });
             },
             // 訂閱Qrcode登入SSE
@@ -243,28 +242,37 @@
                     headers: headers,
                     body: JSON.stringify(body)
                 })
-                    .then(r => r.json())
-                    .then(json => {
-                        if (json.success) {
-                            let token = json.data.token;
-                            //console.log(`token: ${token}`);
-                            this.error = false;
-                            this.LoginCookie(token);
-                            if(Cookies.get('login-token')){
-                                this.$router.push('/userlist')
-                            }
+                    .then(r => {
+                        if (!r.ok) {
+                            throw Error(`${r.status}@${r.statusText}`);
                         }
-                        else {
-                            this.error = true;
-                            this.errorMessage = '登入失敗';
+                        return r.json();
+                    })
+                    .then(json => {
+                        let token = json.data.token;
+                        //console.log(`token: ${token}`);
+                        this.error = false;
+                        this.LoginCookie(token);
+                        if (Cookies.get('login-token')) {
+                            this.$router.push('/userlist')
                         }
                     })
-                    .catch((error) => {
-                        this.error = true;
-                        this.errorMessage = '登入失敗';
-                        console.log(error);
+                    .catch(error => {
+                        this.FetchErrorHandle(error);
                     });
-            }
+            },
+
+            FetchErrorHandle(error) {
+                const errArr = error.toString().split('@');
+                this.loading = false;
+                const errorCode = errArr[0];
+                this.error = true;
+                this.errorMessage = '登入失敗，請檢查您的帳號和密碼。';
+                if (errorCode.includes(401)) {
+                    Cookies.remove(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
+                    this.$router.push('/')
+                }
+            },
         },
     });
 </script>

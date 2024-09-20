@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using WUM.Server;
 
-namespace WelldoneUserManagement.Server.Controllers
+namespace WUM.Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]

@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace WUM.Lib.Models.UserInfo
 {
-    public class UserInfoRowVM
+    public class UserInfoVM
     {
         public int Id { get; set; }
         public string Username { get; set; }
         public string Displayname { get; set; }
         public bool Status { get; set; }
+        public string Country { get; set; }
     }
 }

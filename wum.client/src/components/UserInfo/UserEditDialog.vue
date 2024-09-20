@@ -8,8 +8,8 @@
         </v-alert>
 
         <v-card :loading="loading">
-            <v-form ref="form" @submit.prevent="Create">
-                <template slot="progress">
+            <v-form ref="form" @submit.prevent="Edit">
+                <template v-slot:progress>
                     <v-progress-linear color="deep-purple"
                                        height="10"
                                        indeterminate></v-progress-linear>
@@ -18,16 +18,16 @@
                 <v-card-text>
 
                     <v-card-subtitle class="mb-4">基本資訊</v-card-subtitle>
-                    <v-text-field label="*使用者帳號" 
-                                  v-model="username"
+                    <v-text-field label="*使用者帳號"
+                                  v-model="user.username"
                                   :rules="requiredRule"></v-text-field>
-                    <v-text-field label="*使用者名稱" 
-                                  v-model="diplayname"
+                    <v-text-field label="*使用者名稱"
+                                  v-model="user.displayname"
                                   :rules="requiredRule"></v-text-field>
-                    <v-text-field label="*電子郵件" 
-                                  v-model="email"
+                    <v-text-field label="*電子郵件"
+                                  v-model="user.email"
                                   :rules="requiredRule.concat(emailRule)"></v-text-field>
-                    <VueSelect v-model="country"
+                    <VueSelect v-model="user.country"
                                :options="countryList"
                                placeholder="國籍" />
 
@@ -36,11 +36,11 @@
                               item-text="label"
                               item-value="value"
                               label="狀態"
-                              v-model="status"
+                              v-model="user.status"
                               outlined></v-select>
 
                     <v-card-subtitle class="mb-4">安全資訊</v-card-subtitle>
-                    <v-text-field v-model="password"
+                    <v-text-field v-model="user.password"
                                   label="密碼"
                                   prepend-inner-icon="mdi-lock"
                                   :type="showPassword ? 'text' : 'password'"
@@ -68,6 +68,7 @@
     import { defineComponent } from 'vue';
     import Cookies from 'js-cookie';
     import VueSelect from "vue3-select-component";
+    import Swal from 'sweetalert2';
 
     export default defineComponent({
         components: {
@@ -78,29 +79,34 @@
         filters: {
         },
         props: {
+            editId: {
+                type: Number,
+                required: true
+            }
         },
         data() {
             return {
                 showDialog: true,
                 getCountriesApi: '/api/Country',
-                createUserApi: '/api/UserInfo',
-                username: '',
-                diplayname: '',
-                email: '',
-                country: '',
-                status: true,
+                userApi: '/api/UserInfo',
+                user:{},
+                //username: '',
+                //diplayname: '',
+                //email: '',
+                //country: '',
+                //status: true,
                 statusOptions: [
                     { title: '啟用', value: true },
                     { title: '未啟用', value: false }
                 ],
-                password: '',
+                //password: '',
                 showPassword: false,
                 showAlert: false,
                 alertType: 'error',
                 errorMessage: '',
                 loading: false,
                 countryList: [],
-
+                // 驗證規則
                 emailRule: [(v) => /.+@.+\..+/.test(v) || '不是正確的email'],
                 requiredRule: [v => !!v || '必填'],
             }
@@ -124,26 +130,63 @@
         },
         deactivated() {
         },
-        beforeDestroy() {
+        beforeUnmount() {
         },
-        destroyed() {
+        unmounted() {
             this.showAlert = false;
         },
         methods: {
             Init() {
-                this.username = '';
-                this.diplayname = '';
-                this.email = '';
-                this.country = '';
-                this.status = true;
-                this.password = '';
+                this.InitUser();
                 this.showPassword = false;
                 this.showAlert = false;
-                this.loading= false;
+                this.loading = false;
                 this.GetCountries();
+                this.Detail();
             },
 
-            async Create() {
+            InitUser(){
+                this.user = {
+                    id: this.editId,
+                    username: '',
+                    diplayname: '',
+                    email: '',
+                    country: '',
+                    status: true,
+                    password: '',
+                };
+            },
+
+            Detail(){
+                this.showAlert = false;
+                this.loading = true;
+                let token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
+                let headers = {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    'Authorization': `Bearer ${token}`
+                };
+                fetch(`${this.userApi}/${this.editId}`, {
+                    method: "GET",
+                    headers: headers,
+                })
+                    .then(r => {
+                        if (!r.ok) {
+                            throw Error(`${r.status}@${r.statusText}`);
+                        }
+                        return r.json();
+                    })
+                    .then(json => {
+                        this.user = json.data;
+                        //console.log(this.user);
+                        this.loading = false;
+                        return;
+                    }).catch(error => {
+                        this.FetchErrorHandle(error);
+                    });
+            },
+
+            async Edit() {
                 const { valid } = await this.$refs.form.validate();
                 if (!valid)
                     return;
@@ -155,19 +198,10 @@
                     "Accept": "application/json",
                     'Authorization': `Bearer ${token}`
                 };
-                let body = {
-                    "Username": this.username,
-                    "DisplayName": this.diplayname,
-                    "Email": this.email,
-                    "Country": this.country,
-                    "Status": this.status,
-                    "Password": this.password
-                };
-                
-                fetch(this.createUserApi, {
-                    method: "POST",
+                fetch(this.userApi, {
+                    method: "PUT",
                     headers: headers,
-                    body: JSON.stringify(body)
+                    body: JSON.stringify(this.user)
                 })
                     .then(r => {
                         if (!r.ok) {
@@ -177,9 +211,9 @@
                     })
                     .then(json => {
                         let data = json.data;
-                        this.SetAlert(true, 'success', '新增成功');
-                        this.Close(); // Use the new close method
+                        this.SuccessAlert();
                         this.loading = false;
+                        this.Close();
                         return;
                     }).catch(error => {
                         this.FetchErrorHandle(error);
@@ -228,6 +262,16 @@
                     }).catch(error => {
                         this.FetchErrorHandle(error);
                     });
+            },
+
+            SuccessAlert() {
+                Swal.fire({
+                    icon: "success",
+                    timer: 1000, // 彈窗顯示的時間 (2000 毫秒 = 2 秒)
+                    showConfirmButton: false, // 隱藏確認按鈕
+                    timerProgressBar: true, // 顯示進度條
+                    position: 'top-end', // 移到右上角
+                });
             }
         },
     });

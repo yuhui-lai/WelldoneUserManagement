@@ -1,4 +1,4 @@
-namespace WelldoneUserManagement.Server
+namespace WUM.Server
 {
     public class WeatherForecast
     {

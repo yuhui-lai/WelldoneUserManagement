@@ -10,7 +10,7 @@ namespace WUM.Lib.Services
     {
         public CountryService() { }
 
-        public CommonAPIModel<List<CountrySelectOption>> GetCountries()
+        public CommAPIModel<List<CountrySelectOption>> GetCountries()
         {
             List<CountrySelectOption> list = new List<CountrySelectOption>();
 
@@ -24,7 +24,7 @@ namespace WUM.Lib.Services
                 c.Code = country.Alpha3Code.ToString();
                 list.Add(c);
             }
-            return new CommonAPIModel<List<CountrySelectOption>>
+            return new CommAPIModel<List<CountrySelectOption>>
             {
                 Data = list
             };

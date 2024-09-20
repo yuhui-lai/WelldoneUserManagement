@@ -9,12 +9,16 @@
     <v-navigation-drawer v-model="drawer" temporary>
         <v-list>
             <v-list-item>
-                <v-btn prepend-icon="$vuetify" :to="'/userlist'">
+                <v-btn prepend-icon="mdi-account-details" 
+                       :to="'/userlist'"
+                       block>
                     使用者列表
                 </v-btn>
             </v-list-item>
             <v-list-item>
-                <v-btn prepend-icon="mdi-button-cursor" :to="'/hello'">
+                <v-btn prepend-icon="mdi-test-tube" 
+                       :to="'/hello'"
+                       block>
                     Hello
                 </v-btn>
             </v-list-item>

@@ -18,7 +18,8 @@
                     <v-col cols="6">
                         <v-text-field class="search-block-row"
                                       clearable
-                                      variant="outlined"></v-text-field>
+                                      variant="outlined"
+                                      v-model="searchKey.Username"></v-text-field>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -30,7 +31,8 @@
                     <v-col cols="6">
                         <v-text-field class="search-block-row"
                                       clearable
-                                      variant="outlined"></v-text-field>
+                                      variant="outlined"
+                                      v-model="searchKey.Displayname"></v-text-field>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -41,17 +43,19 @@
                     </v-col>
                     <v-col cols="6">
                         <v-select class="search-block-select-row"
-                                  :items="['啟用', '暫停']"></v-select>
+                                  :items="statusOptions"
+                                  v-model="searchKey.Status"></v-select>
                     </v-col>
                 </v-row>
                 <v-row>
                     <v-col cols="4" class="text-right">
                         <p class="text-h6 font-weight-medium">
-                            國籍</p>
+                            國籍
+                        </p>
                     </v-col>
                     <v-col cols="6">
-                        <VueSelect v-model="country"
-                                   :options="countryList"/>
+                        <VueSelect v-model="searchKey.Country"
+                                   :options="countryList" />
                     </v-col>
                 </v-row>
                 <v-row>
@@ -61,7 +65,8 @@
                     <v-col cols="8" class="search-block-row">
                         <v-btn prepend-icon="mdi-magnify"
                                elevation="4"
-                               class="mr-4">
+                               class="mr-4"
+                               v-on:click="GetUserInfos">
                             查詢
                         </v-btn>
                         <v-btn prepend-icon="mdi-broom"
@@ -77,7 +82,7 @@
                  elevation="4"
                  height="60vh"
                  rounded>
-            <v-data-table :headers="tableHeader" :items="userinfos" :search="searchKey" item-key="id" :loading="loading">
+            <v-data-table :headers="tableHeader" :items="userinfos" item-key="id" :loading="loading">
                 <template v-slot:top>
                     <v-toolbar flat color="surface">
                         <v-spacer></v-spacer>
@@ -97,16 +102,20 @@
                 <template v-slot:item.edit="{ item }">
                     <v-btn color="primary"
                            prepend-icon="mdi-pencil"
-                           rounded>修改</v-btn>
+                           rounded
+                           v-on:click="OpenEditDialog(item.id)">修改</v-btn>
                 </template>
                 <template v-slot:item.delete="{ item }">
                     <v-btn color="error"
                            prepend-icon="mdi-close"
-                           rounded>刪除</v-btn>
+                           rounded
+                           v-on:click="OpenDeleteDialog(item.id)">刪除</v-btn>
                 </template>
             </v-data-table>
         </v-sheet>
         <UserCreateDialog v-if="isCreateDialogVisible" @close="CloseUserCreateDialog" />
+        <UserDeleteDialog :delId="deleteId" v-if="isDeleteDialogVisible" @close="CloseUserDeleteDialog" />
+        <UserEditDialog :editId="edit_Id" v-if="isEditDialogVisible" @close="CloseUserEditDialog" />
     </v-container>
     
 
@@ -115,13 +124,17 @@
 <script lang="js">
     import { defineComponent } from 'vue';
     import Cookies from 'js-cookie';
-    import UserCreateDialog from '@/components/UserInfo/UserCreateDialog.vue';
     import VueSelect from "vue3-select-component";
+    import UserCreateDialog from '@/components/UserInfo/UserCreateDialog.vue';
+    import UserDeleteDialog from '@/components/UserInfo/UserDeleteDialog.vue';
+    import UserEditDialog from '@/components/UserInfo/UserEditDialog.vue';
 
     export default defineComponent({
         components: {
             UserCreateDialog,
-            VueSelect
+            VueSelect,
+            UserDeleteDialog,
+            UserEditDialog,
         },
         directives: {
         },
@@ -136,7 +149,6 @@
                 userInfoApi: '/api/UserInfo',
                 getCountriesApi: '/api/Country',
                 userinfos: [],
-
                 tableHeader: [
                     { title: '#', key: 'id' },
                     { title: '使用者帳號', key: 'username' },
@@ -145,11 +157,27 @@
                     { title: '編輯', key: 'edit', sortable: false },
                     { title: '刪除', key: 'delete', sortable: false },
                 ],
-
-                searchKey: '',
-                isCreateDialogVisible: false,
-                country: '',
+                searchKey: {
+                    Username: '',
+                    Displayname: '',
+                    Status: '',
+                    Country: ''
+                },  
+                statusOptions: [
+                    { title: '', value: '' },
+                    { title: '啟用', value: true },
+                    { title: '未啟用', value: false }
+                ], 
+                //country: '',
                 countryList: [],
+                // 新增
+                isCreateDialogVisible: false,
+                // 刪除
+                isDeleteDialogVisible: false,
+                deleteId: '',
+                // 編輯
+                isEditDialogVisible: false,
+                edit_Id: '',
             }
         },
         computed: {
@@ -172,20 +200,26 @@
         },
         deactivated() {
         },
-        beforeDestroy() {
+        beforeUnmount() {
         },
-        destroyed() {
+        unmounted() {
         },
         methods: {
             GetUserInfos() {
                 this.loading = true;
                 let token = Cookies.get('login-token');
-
+                //console.log(token);
                 let headers = {
                     'Authorization': `Bearer ${token}`
                 };
 
-                fetch(this.userInfoApi, {
+                let url = this.userInfoApi + "?";
+                url += (this.searchKey.Username? `Username=${this.searchKey.Username}&` :"");
+                url += (this.searchKey.Displayname? `Displayname=${this.searchKey.Displayname}&` :"");
+                url += (this.searchKey.Status!=null? `Status=${this.searchKey.Status}&` :"");
+                url += (this.searchKey.Country? `Country=${this.searchKey.Country}&` :"");
+                console.log(url);
+                fetch(url, {
                     method: 'GET',
                     headers: headers,
                 })
@@ -211,8 +245,30 @@
             },
 
             CloseUserCreateDialog() {
-                console.log('CloseUserCreateDialog()');
+                //console.log('CloseUserCreateDialog()');
                 this.isCreateDialogVisible = false;
+                this.GetUserInfos();
+            },
+
+            OpenDeleteDialog(id) {
+                this.deleteId = id;
+                this.isDeleteDialogVisible = true;
+            },
+
+            CloseUserDeleteDialog() {
+                this.isDeleteDialogVisible = false;
+                this.deleteId = '';
+                this.GetUserInfos();
+            },
+
+            OpenEditDialog(id) {
+                this.edit_Id = id;
+                this.isEditDialogVisible = true;
+            },
+
+            CloseUserEditDialog() {
+                this.isEditDialogVisible = false;
+                this.edit_Id = '';
                 this.GetUserInfos();
             },
 

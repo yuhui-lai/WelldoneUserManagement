@@ -8,7 +8,7 @@
         </v-alert>
 
         <v-card :loading="loading">
-            <template slot="progress">
+            <template v-slot:progress>
                 <v-progress-linear color="deep-purple"
                                    height="10"
                                    indeterminate></v-progress-linear>
@@ -84,9 +84,9 @@
         },
         deactivated() {
         },
-        beforeDestroy() {
+        beforeUnmount() {
         },
-        destroyed() {
+        unmounted() {
         },
         methods: {
             Init() {
@@ -96,7 +96,11 @@
             Delete() {
                 this.showAlert = false;
                 this.loading = true;
-                let token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
+                const token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
+                const operatorId = Cookies.get(import.meta.env.VITE_COOKIE_USERID);
+                let body = {
+                    "OperatorId": operatorId
+                };
                 let headers = {
                     "Content-Type": "application/json",
                     "Accept": "application/json",
@@ -105,7 +109,8 @@
 
                 fetch(`${this.deleteUserApi}/${this.delId}`, {
                     method: "DELETE",
-                    headers: headers
+                    headers: headers,
+                    body: JSON.stringify(body)
                 })
                     .then(r => {
                         if (!r.ok) {

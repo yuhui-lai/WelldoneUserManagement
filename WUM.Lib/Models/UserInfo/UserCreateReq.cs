@@ -5,6 +5,8 @@ namespace WUM.Lib.Models.UserInfo
     public class UserCreateReq
     {
         [Required]
+        public string OperatorId { get; set; }
+        [Required]
         public string Username { get; set; }
         [Required]
         public string DisplayName { get; set; }

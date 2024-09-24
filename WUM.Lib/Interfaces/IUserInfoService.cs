@@ -8,7 +8,7 @@ namespace WUM.Lib.Interfaces
         Task<CommAPIModel<List<UserInfoVM>>> GetUserInfos(UserInfoReq req);
         Task<CommAPIModel<UserDetailVM>> GetUserDetail(int id);
         Task<CommAPIModel<string>> CreateUser(UserCreateReq req);
-        Task<CommAPIModel<string>> DeleteUser(int id);
+        Task<CommAPIModel<string>> DeleteUser(int id, UserDeleteReq req);
         Task<CommAPIModel<string>> EditUser(UserEditReq req);
     }
 }

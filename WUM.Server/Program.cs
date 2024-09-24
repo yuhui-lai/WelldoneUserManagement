@@ -1,9 +1,11 @@
+ï»¿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using WUM.Lib.Extensions;
 using WUM.Lib.Interfaces;
+using WUM.Lib.Models.DB_Context;
 using WUM.Lib.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,15 +17,19 @@ builder.Services.AddScoped<IUserInfoService, UserInfoService>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 //builder.Services.AddScoped<ApiLogFilter>();
 
-builder.Services.AddControllers(options =>
+builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    //options.Filters.Add<ApiLogFilter>();
+    options.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//½s½X¾¹±N°ò¥»©Ô¤B¦r¤¸»P¤¤¤éÁú¦r¤¸¯Ç¤J¤¹³\½d³ò¤£°µÂà½X
+//ç·¨ç¢¼å™¨å°‡åŸºæœ¬æ‹‰ä¸å­—å…ƒèˆ‡ä¸­æ—¥éŸ“å­—å…ƒç´å…¥å…è¨±ç¯„åœä¸åšè½‰ç¢¼
 builder.Services.AddSingleton(HtmlEncoder.Create(allowedRanges: new[] { UnicodeRanges.All }));
+builder.Services.AddDbContext<ManagementContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Management"));
+});
 builder.Services.SetDapper(builder.Configuration);
 builder.Services.AddHttpClient();
 builder.Services.AddAuthentication()
@@ -33,36 +39,36 @@ builder.Services.AddAuthentication()
         // using Microsoft.IdentityModel.Tokens;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            #region  °t¸mÅçÃÒµo¦æªÌ
+            #region  é…ç½®é©—è­‰ç™¼è¡Œè€…
 
-            ValidateIssuer = true, // ¬O§_­n±Ò¥ÎÅçÃÒµo¦æªÌ
+            ValidateIssuer = true, // æ˜¯å¦è¦å•Ÿç”¨é©—è­‰ç™¼è¡Œè€…
             ValidIssuer = builder.Configuration.GetSection("JWTConfig").GetValue<string>("Issuer"),
 
             #endregion
 
-            #region °t¸mÅçÃÒ±µ¦¬¤è
+            #region é…ç½®é©—è­‰æ¥æ”¶æ–¹
 
-            ValidateAudience = false, // ¬O§_­n±Ò¥ÎÅçÃÒ±µ¦¬ªÌ
-            // ValidAudience = "" // ¦pªG¤£»İ­nÅçÃÒ±µ¦¬ªÌ¥i¥Hµù¸Ñ
-
-            #endregion
-
-            #region °t¸mÅçÃÒToken¦³®Ä´Á¶¡
-
-            ValidateLifetime = true, // ¬O§_­n±Ò¥ÎÅçÃÒ¦³®Ä®É¶¡
+            ValidateAudience = false, // æ˜¯å¦è¦å•Ÿç”¨é©—è­‰æ¥æ”¶è€…
+            // ValidAudience = "" // å¦‚æœä¸éœ€è¦é©—è­‰æ¥æ”¶è€…å¯ä»¥è¨»è§£
 
             #endregion
 
-            #region °t¸mÅçÃÒª÷Æ_
+            #region é…ç½®é©—è­‰Tokenæœ‰æ•ˆæœŸé–“
 
-            ValidateIssuerSigningKey = false, // ¬O§_­n±Ò¥ÎÅçÃÒª÷Æ_¡A¤@¯ë¤£»İ­n¥hÅçÃÒ¡A¦]¬°³q±`Token¤º¥u·|¦³Ã±³¹
+            ValidateLifetime = true, // æ˜¯å¦è¦å•Ÿç”¨é©—è­‰æœ‰æ•ˆæ™‚é–“
 
             #endregion
 
-            #region °t¸mÃ±³¹ÅçÃÒ¥Îª÷Æ_
+            #region é…ç½®é©—è­‰é‡‘é‘°
 
-            // ³o¸Ì°t¸m¬O¥Î¨Ó¸ÑHttp Request¤ºToken¥[±K
-            // ¦pªGSecret Key¸ò·íªì«Ø¥ßToken©Ò¨Ï¥ÎªºSecret Key¤£¤@¼Ëªº¸Ü·|¾É­PÅçÃÒ¥¢±Ñ
+            ValidateIssuerSigningKey = false, // æ˜¯å¦è¦å•Ÿç”¨é©—è­‰é‡‘é‘°ï¼Œä¸€èˆ¬ä¸éœ€è¦å»é©—è­‰ï¼Œå› ç‚ºé€šå¸¸Tokenå…§åªæœƒæœ‰ç°½ç« 
+
+            #endregion
+
+            #region é…ç½®ç°½ç« é©—è­‰ç”¨é‡‘é‘°
+
+            // é€™è£¡é…ç½®æ˜¯ç”¨ä¾†è§£Http Requestå…§TokenåŠ å¯†
+            // å¦‚æœSecret Keyè·Ÿç•¶åˆå»ºç«‹Tokenæ‰€ä½¿ç”¨çš„Secret Keyä¸ä¸€æ¨£çš„è©±æœƒå°è‡´é©—è­‰å¤±æ•—
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(
                     builder.Configuration.GetSection("JWTConfig").GetValue<string>("SignKey")

@@ -1,7 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Reflection;
 using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
 using WUM.Lib.Interfaces;
 using WUM.Lib.Models.Common;
+using WUM.Lib.Models.DB_Context;
 using WUM.Lib.Models.UserInfo;
 using WUM.Lib.Utilities;
 
@@ -12,12 +18,15 @@ namespace WUM.Lib.Services
         private readonly ISqlConnectionFactory dapper;
         private readonly HtmlEncoder encoder;
         private readonly ILogger<UserInfoService> logger;
+        private readonly ManagementContext dbContext;
 
-        public UserInfoService(ISqlConnectionFactory dapper, HtmlEncoder encoder, ILogger<UserInfoService> logger)
+        public UserInfoService(ISqlConnectionFactory dapper, HtmlEncoder encoder, ILogger<UserInfoService> logger,
+            ManagementContext dbContext)
         {
             this.dapper = dapper;
             this.encoder = encoder;
             this.logger = logger;
+            this.dbContext = dbContext;
         }
 
         public async Task<CommAPIModel<List<UserInfoVM>>> GetUserInfos(UserInfoReq req)
@@ -34,6 +43,10 @@ namespace WUM.Lib.Services
                 (string.IsNullOrEmpty(cCountry) || u.Country.Contains(cCountry))
             ).ToList();
 
+            var log = dbContext.WelldoneLog.FirstOrDefault(x=>x.Id == 63 );
+            var msg = encoder.Encode(log.LogMsg);
+
+
             return new CommAPIModel<List<UserInfoVM>>
             {
                 Data = res
@@ -42,10 +55,13 @@ namespace WUM.Lib.Services
 
         public async Task<CommAPIModel<string>> CreateUser(UserCreateReq req)
         {
+            string cOptId = req.OperatorId.Purify(encoder);
             string cUser = req.Username.Purify(encoder);
             string cName = req.DisplayName.Purify(encoder);
             string cPass = req.Password.Purify(encoder);
             string cEmail = req.Email.Purify(encoder);
+
+            await SaveLog(req, cOptId, "UserInfoService CreateUser()");
 
             return new CommAPIModel<string>
             {
@@ -54,8 +70,16 @@ namespace WUM.Lib.Services
             };
         }
 
-        public async Task<CommAPIModel<string>> DeleteUser(int id)
+        public async Task<CommAPIModel<string>> DeleteUser(int id, UserDeleteReq req)
         {
+            string cOptId = req.OperatorId.Purify(encoder);
+            var delModel = new
+            {
+                DeleteId = id,
+                Req = req
+            };
+            await SaveLog(delModel, cOptId, "UserInfoService DeleteUser()");
+
             return new CommAPIModel<string>
             {
                 Msg = "刪除成功",
@@ -70,10 +94,13 @@ namespace WUM.Lib.Services
                 Msg = "取得成功",
                 Data = GetFakeUserDetail()
             };
-        }
+        }   
 
         public async Task<CommAPIModel<string>> EditUser(UserEditReq req)
         {
+            string cOptId = req.OperatorId.Purify(encoder);
+            await SaveLog(req, cOptId, "UserInfoService EditUser()");
+
             return new CommAPIModel<string>
             {
                 Msg = "編輯成功",
@@ -128,6 +155,25 @@ namespace WUM.Lib.Services
                 System = new SystemRole { }
             };
             return vm;
+        }
+
+        private async Task SaveLog<T>(T req, string operatorId, string logSource)
+        {
+            var options = new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+            };
+
+            WelldoneLog log = new WelldoneLog
+            {
+                LogDate = TimeUtil.UtcNow(),
+                LogLevel = LogLevel.Information.ToString(),
+                LogMsg = JsonSerializer.Serialize(req, options),
+                UserId = operatorId,
+                LogSource = logSource
+            };
+            await dbContext.WelldoneLog.AddAsync(log);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

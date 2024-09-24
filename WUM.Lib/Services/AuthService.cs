@@ -7,8 +7,6 @@ using WUM.Lib.Interfaces;
 using WUM.Lib.Models.Auth;
 using WUM.Lib.Models.Common;
 using WUM.Lib.Models.JWT;
-using WUM.Lib.Models.LogModel;
-using WUM.Lib.Utilities;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace WUM.Lib.Services
@@ -42,7 +40,7 @@ namespace WUM.Lib.Services
                 return LoginErrorResponse(msg);
             }
 
-            string loginApi = config["WelldoneAuth:PasswordLoginAPI"];
+            string loginApi = $"{config["WelldoneAuth:Base"]}{config["WelldoneAuth:PasswordLoginAPI"]}";
             var reqJson = new StringContent(
                 JsonSerializer.Serialize(req),
                 Encoding.UTF8,
@@ -67,8 +65,6 @@ namespace WUM.Lib.Services
             }
 
             msg = "登入成功";
-            // 寫log
-            await LoginSuccLog(msg, req.Username, "AuthService PasswordLogin()");
             return new CommAPIModel<LoginRes>
             {
                 Msg = msg,
@@ -84,7 +80,7 @@ namespace WUM.Lib.Services
         {
             string msg = "Qrcode產生成功";
 
-            string qrcodeLoginPrepareApi = config["WelldoneAuth:QrcodeLoginPrepareAPI"];
+            string qrcodeLoginPrepareApi = $"{config["WelldoneAuth:Base"]}{config["WelldoneAuth:QrcodeLoginPrepareAPI"]}";
             var reqJson = new StringContent(
                 JsonSerializer.Serialize(""),
                 Encoding.UTF8,
@@ -118,7 +114,7 @@ namespace WUM.Lib.Services
         public async Task<CommAPIModel<LoginRes>> QrcodeLogin(QrcodeLoginReq req)
         {
             string msg = "";
-            string qrcodeLoginApi = config["WelldoneAuth:QrcodeLoginAPI"];
+            string qrcodeLoginApi = $"{config["WelldoneAuth:Base"]}{config["WelldoneAuth:QrcodeLoginAPI"]}";
 
             var reqJson = new StringContent(
                 JsonSerializer.Serialize(req),
@@ -136,8 +132,6 @@ namespace WUM.Lib.Services
                 if (jwtRes.isSuccess)
                 {
                     msg = "登入成功";
-                    // 寫log
-                    await LoginSuccLog(msg, wdAuthRes.Data.DisplayName, "AuthService QrcodeLogin()");
                     return new CommAPIModel<LoginRes>
                     {
                         Data = new LoginRes
@@ -177,20 +171,6 @@ namespace WUM.Lib.Services
                 Msg = msg,
                 Data = new LoginRes()
             };
-        }
-
-        private async Task LoginSuccLog(string msg, string userId, string source)
-        {
-            // 寫log
-            using var conn = dapper.CreateConnection();
-            WelldoneLog log = new WelldoneLog
-            {
-                LogDate = TimeUtil.UtcNow(),
-                LogMsg = msg,
-                UserId = userId,
-                LogSource = source
-            };
-            await LogUtil.Save(conn, log);
         }
     }
 }

@@ -6,6 +6,8 @@ namespace WUM.Lib.Models.UserInfo
     public class UserEditReq
     {
         [Required]
+        public string OperatorId { get; set; }
+        [Required]
         public int Id { get; set; }
         [Required]
         public string Username { get; set; }

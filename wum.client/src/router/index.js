@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+ï»¿import { createRouter, createWebHistory } from 'vue-router';
 import Cookies from 'js-cookie';
 
 const routes = [
@@ -6,7 +6,7 @@ const routes = [
         path: '/',
         name: 'index',
         component: () => import('@/layouts/MainLayout.vue'),
-        meta: { requireAuth: true }, // ¥Î¨Ó§@¬°¦¹­¶¬O§_»İ­nÅv­­ÅçÃÒªº³]©w
+        meta: { requireAuth: true }, // ç”¨ä¾†ä½œç‚ºæ­¤é æ˜¯å¦éœ€è¦æ¬Šé™é©—è­‰çš„è¨­å®š
         children: [
             {
                 path: '/userlist',
@@ -19,12 +19,17 @@ const routes = [
             {
                 path: '/',
                 redirect: '/login'
-            }
+            },
         ]
     },
     {
         path: '/login',
         component: () => import('@/pages/Auth/LoginPage.vue'),
+    },
+    {
+        path: '/logout',
+        component: () => import('@/pages/Auth/LogoutPage.vue'),
+        meta: { requireAuth: true }, // ç”¨ä¾†ä½œç‚ºæ­¤é æ˜¯å¦éœ€è¦æ¬Šé™é©—è­‰çš„è¨­å®š
     }
 ];
 
@@ -34,21 +39,21 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    // ¬İ¬İ to ©M from ¨â­Ó arguments ·|¦R¦^¤°»ò°T®§
+    // çœ‹çœ‹ to å’Œ from å…©å€‹ arguments æœƒåå›ä»€éº¼è¨Šæ¯
     //console.log('to: ', to)
     //console.log('from: ', from)
 
-    // ¥Øªº¸ô¥Ñ¦bmeta¤W¬O§_¦³³]¸mrequireAuth: true
+    // ç›®çš„è·¯ç”±åœ¨metaä¸Šæ˜¯å¦æœ‰è¨­ç½®requireAuth: true
     if (to.meta.requireAuth) {
-        // Àò¨úCookies·í¤¤ªºlogin¸ê°T¨Ã¨ú±otoken
+        // ç²å–Cookiesç•¶ä¸­çš„loginè³‡è¨Šä¸¦å–å¾—token
         const token = Cookies.get('login-token')
         //console.log(token)
         if (token) {
-            // ¦pªGtoken¤£¬°ªÅ¡A¥B½T¹ê¦³³o­ÓÄæ¦ì«hÅı¸ô¥ÑÅÜ§ó
+            // å¦‚æœtokenä¸ç‚ºç©ºï¼Œä¸”ç¢ºå¯¦æœ‰é€™å€‹æ¬„ä½å‰‡è®“è·¯ç”±è®Šæ›´
             if (token.length > 0 || token === undefined) {
                 next()
             } else {
-                // ¥¼³q¹L«h¾É¦^login­¶­±
+                // æœªé€šéå‰‡å°å›loginé é¢
                 next('/login')
             }
         } else {

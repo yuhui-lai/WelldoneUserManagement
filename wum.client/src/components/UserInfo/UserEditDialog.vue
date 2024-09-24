@@ -147,6 +147,7 @@
 
             InitUser(){
                 this.user = {
+                    operatorId: '',
                     id: this.editId,
                     username: '',
                     diplayname: '',
@@ -192,7 +193,8 @@
                     return;
                 this.showAlert = false;
                 this.loading = true;
-                let token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
+                const token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
+                this.user.operatorId = Cookies.get(import.meta.env.VITE_COOKIE_USERID);
                 let headers = {
                     "Content-Type": "application/json",
                     "Accept": "application/json",

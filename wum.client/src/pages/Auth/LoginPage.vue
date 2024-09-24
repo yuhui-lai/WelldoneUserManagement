@@ -177,7 +177,8 @@
             },
             // 登入存cookie
             LoginCookie(token) {
-                Cookies.set('login-token', token, { expires: 1 });
+                Cookies.set(import.meta.env.VITE_COOKIE_LOGIN_TOKEN, token, { expires: 1 });
+                Cookies.set(import.meta.env.VITE_COOKIE_USERID, this.account, { expires: 1 });
             },
             // 切換至Qrcode登入
             SwitchQrcodeLogin() {

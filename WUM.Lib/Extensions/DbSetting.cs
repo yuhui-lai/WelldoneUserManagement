@@ -15,7 +15,7 @@ namespace WUM.Lib.Extensions
             serviceCollection.AddSingleton<ISqlConnectionFactory>(serviceProvider =>
             {
                 //指派連線字串
-                return new DapperFactory(() => configuration.GetConnectionString("YuDB"));
+                return new DapperFactory(() => configuration.GetConnectionString("Management"));
             });
         }
     }

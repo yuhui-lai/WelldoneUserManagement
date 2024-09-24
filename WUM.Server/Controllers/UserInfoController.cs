@@ -74,9 +74,9 @@ namespace WUM.Server.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id, [FromBody] UserDeleteReq req)
         {
-            var res = await userInfoService.DeleteUser(id);
+            var res = await userInfoService.DeleteUser(id, req);
             if (res.Success)
                 return Ok(res);
             return BadRequest(res);

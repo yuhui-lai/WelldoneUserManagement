@@ -150,13 +150,15 @@
                     return;
                 this.showAlert = false;
                 this.loading = true;
-                let token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
+                const token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
                 let headers = {
                     "Content-Type": "application/json",
                     "Accept": "application/json",
                     'Authorization': `Bearer ${token}`
                 };
+                const operatorId = Cookies.get(import.meta.env.VITE_COOKIE_USERID);
                 let body = {
+                    "OperatorId": operatorId,
                     "Username": this.username,
                     "DisplayName": this.displayname,
                     "Email": this.email,

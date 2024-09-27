@@ -48,7 +48,7 @@ export default defineConfig({
                 secure: false
             }
         },
-        port: 5173,
+        port: env.VITE_WUM_CLIENT_PORT,
         https: {
             key: fs.readFileSync(keyFilePath),
             cert: fs.readFileSync(certFilePath),

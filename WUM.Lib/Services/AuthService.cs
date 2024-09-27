@@ -155,7 +155,8 @@ namespace WUM.Lib.Services
             };
             string key = config["JWTConfig:SignKey"];
             string iss = config["JWTConfig:Issuer"];
-            return jwtServices.GetJWT(jwtCliam, key, iss);
+            int expire = config.GetValue<int>("JWTConfig:ExpireTime");
+            return jwtServices.GetJWT(jwtCliam, key, iss, expire);
         }
 
         private bool ChkLoginReq(PasswordLoginReq req)

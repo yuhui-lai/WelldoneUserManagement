@@ -1,8 +1,6 @@
 ﻿<template>
     <v-container width="100vw">
-        <v-sheet class="flex-wrap px-4 py-8 mb-4"
-                 elevation="4"
-                 rounded>
+        <v-sheet class="px-4 py-8 mb-4" elevation="4" rounded>
             <v-form>
                 <v-row>
                     <v-col>
@@ -16,10 +14,8 @@
                         </p>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field class="search-block-row"
-                                      clearable
-                                      variant="outlined"
-                                      v-model="searchKey.Username"></v-text-field>
+                        <v-text-field class="search-block-row" clearable variant="outlined"
+                            v-model="searchKey.Username"></v-text-field>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -29,10 +25,8 @@
                         </p>
                     </v-col>
                     <v-col cols="6">
-                        <v-text-field class="search-block-row"
-                                      clearable
-                                      variant="outlined"
-                                      v-model="searchKey.Displayname"></v-text-field>
+                        <v-text-field class="search-block-row" clearable variant="outlined"
+                            v-model="searchKey.Displayname"></v-text-field>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -42,9 +36,8 @@
                         </p>
                     </v-col>
                     <v-col cols="6">
-                        <v-select class="search-block-select-row"
-                                  :items="statusOptions"
-                                  v-model="searchKey.Status"></v-select>
+                        <v-select class="search-block-select-row" :items="statusOptions"
+                            v-model="searchKey.Status"></v-select>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -54,8 +47,7 @@
                         </p>
                     </v-col>
                     <v-col cols="6">
-                        <VueSelect v-model="searchKey.Country"
-                                   :options="countryList" />
+                        <VueSelect v-model="searchKey.Country" :options="countryList" />
                     </v-col>
                 </v-row>
                 <v-row>
@@ -63,14 +55,11 @@
                         <p class="text-h6 font-weight-medium"></p>
                     </v-col>
                     <v-col cols="8" class="search-block-row">
-                        <v-btn prepend-icon="mdi-magnify"
-                               elevation="4"
-                               class="mr-4"
-                               v-on:click="GetUserInfos">
+                        <v-btn color="primary" prepend-icon="mdi-magnify" elevation="4" class="mr-4"
+                            v-on:click="GetUserInfos">
                             查詢
                         </v-btn>
-                        <v-btn prepend-icon="mdi-broom"
-                               elevation="4">
+                        <v-btn prepend-icon="mdi-broom" elevation="4">
                             清除
                         </v-btn>
                     </v-col>
@@ -78,20 +67,13 @@
             </v-form>
         </v-sheet>
 
-        <v-sheet class="d-flex flex-wrap px-4 py-8 mb-4"
-                 elevation="4"
-                 height="60vh"
-                 rounded>
-            <v-data-table :headers="tableHeader" :items="userinfos" item-key="id" :loading="loading">
+        <v-sheet class="d-flex px-4 py-8 mb-4" elevation="4" height="60vh" rounded>
+            <v-data-table :headers="tableHeader" :items="userinfos" item-key="id" :loading="loading" fixed-header>
                 <template v-slot:top>
                     <v-toolbar flat color="surface">
                         <v-spacer></v-spacer>
-                        <v-btn class="mb-2"
-                               prepend-icon="mdi-plus"
-                               color="primary"
-                               rounded
-                               variant="outlined"
-                               v-on:click="OpenCreateDialog">
+                        <v-btn class="mb-2" prepend-icon="mdi-plus" color="info" rounded variant="outlined"
+                            v-on:click="OpenCreateDialog" elevation="4">
                             新增
                         </v-btn>
                     </v-toolbar>
@@ -100,16 +82,12 @@
                     <span>{{ item.status ? '啟用' : '未啟用' }}</span>
                 </template>
                 <template v-slot:item.edit="{ item }">
-                    <v-btn color="primary"
-                           prepend-icon="mdi-pencil"
-                           rounded
-                           v-on:click="OpenEditDialog(item.id)">修改</v-btn>
+                    <v-btn color="primary" prepend-icon="mdi-pencil" rounded v-on:click="OpenEditDialog(item.id)"
+                        elevation="4">修改</v-btn>
                 </template>
                 <template v-slot:item.delete="{ item }">
-                    <v-btn color="error"
-                           prepend-icon="mdi-close"
-                           rounded
-                           v-on:click="OpenDeleteDialog(item.id)">刪除</v-btn>
+                    <v-btn color="warning" prepend-icon="mdi-close" rounded v-on:click="OpenDeleteDialog(item.id)"
+                        elevation="4">刪除</v-btn>
                 </template>
             </v-data-table>
         </v-sheet>
@@ -117,7 +95,7 @@
         <UserDeleteDialog :delId="deleteId" v-if="isDeleteDialogVisible" @close="CloseUserDeleteDialog" />
         <UserEditDialog :editId="edit_Id" v-if="isEditDialogVisible" @close="CloseUserEditDialog" />
     </v-container>
-    
+
 
 </template>
 
@@ -218,7 +196,7 @@
                 url += (this.searchKey.Displayname? `Displayname=${this.searchKey.Displayname}&` :"");
                 url += (this.searchKey.Status!=null? `Status=${this.searchKey.Status}&` :"");
                 url += (this.searchKey.Country? `Country=${this.searchKey.Country}&` :"");
-                console.log(url);
+                //console.log(url);
                 fetch(url, {
                     method: 'GET',
                     headers: headers,

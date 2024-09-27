@@ -12,25 +12,40 @@ import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css'
 
-//const wumTheme = {
-//    dark: false,
-//    colors: {
-//        background: '#FFFFFF',
-//        surface: '#FFFFFF',
-//        primary: '#6200EE',
-//        'primary-darken-1': '#3700B3',
-//        secondary: '#03DAC6',
-//        'secondary-darken-1': '#018786',
-//        error: '#B00020',
-//        info: '#2196F3',
-//        success: '#4CAF50',
-//        warning: '#FB8C00',
-//    },
-//}
+const wumTheme = {
+    dark: false,
+    colors: {
+        background: '#f9f9ff',
+        surface: '#f9f9ff',
+        primary: '#769CDF',
+        'primary-darken-1': '#5178C0',
+        secondary: '#565f71',
+        'secondary-darken-1': '#f5b0f9',
+        error: '#ba1a1a',
+        info: '#705575',
+        success: '#4CAF50',
+        warning: '#FB8C00',
+        'on-background': '#1A1C1E',
+        'on-surface': '#1A1C1E',
+        'on-primary': '#FFFFFF',
+        'on-secondary': '#ffffff',
+        'on-error': '#FFFFFF',
+        'on-info': '#FFFFFF',
+        'on-success': '#FFFFFF',
+        'on-warning': '#1A1C1E',
+        accent: '#fad8fd',
+    },
+}
 
 const vuetify = createVuetify({
     components,
-    directives
+    directives,
+    theme: {
+        defaultTheme: 'wumTheme',
+        themes: {
+            wumTheme,
+        },
+    }
 })
 
 createApp(App)

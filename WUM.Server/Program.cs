@@ -15,8 +15,18 @@ builder.Services.AddSingleton<JWTBase, JWTServices>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserInfoService, UserInfoService>();
 builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 //builder.Services.AddScoped<ApiLogFilter>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
@@ -96,6 +106,7 @@ else
     app.UseWelldoneExceptHandler(loggerFactory);
 }
 
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

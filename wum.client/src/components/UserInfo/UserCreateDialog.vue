@@ -1,62 +1,37 @@
 ﻿<template>
     <v-dialog v-model="showDialog" max-width="500px" @click:outside="Close">
-        <v-alert v-if="showAlert"
-                 type="error"
-                 dismissible
-                 rounded="lg">
+        <v-alert v-if="showAlert" type="error" dismissible rounded="lg">
             {{ errorMessage }}
         </v-alert>
 
         <v-card :loading="loading">
             <v-form ref="form" @submit.prevent="Create">
                 <template v-slot:progress>
-                    <v-progress-linear color="deep-purple"
-                                       height="10"
-                                       indeterminate></v-progress-linear>
+                    <v-progress-linear color="deep-purple" height="10" indeterminate></v-progress-linear>
                 </template>
                 <v-card-title>新增用戶</v-card-title>
                 <v-card-text>
 
                     <v-card-subtitle class="mb-4">基本資訊</v-card-subtitle>
-                    <v-text-field label="*使用者帳號" 
-                                  v-model="username"
-                                  :rules="requiredRule"></v-text-field>
-                    <v-text-field label="*使用者名稱" 
-                                  v-model="displayname"
-                                  :rules="requiredRule"></v-text-field>
-                    <v-text-field label="*電子郵件" 
-                                  v-model="email"
-                                  :rules="requiredRule.concat(emailRule)"></v-text-field>
-                    <VueSelect v-model="country"
-                               :options="countryList"
-                               placeholder="國籍" />
+                    <v-text-field label="*使用者帳號" v-model="username" :rules="requiredRule"></v-text-field>
+                    <v-text-field label="*使用者名稱" v-model="displayname" :rules="requiredRule"></v-text-field>
+                    <v-text-field label="*電子郵件" v-model="email" :rules="requiredRule.concat(emailRule)"></v-text-field>
+                    <VueSelect v-model="country" :options="countryList" placeholder="國籍" />
 
                     <v-card-subtitle class="mt-6 mb-4">帳戶狀態</v-card-subtitle>
-                    <v-select :items="statusOptions"
-                              item-text="label"
-                              item-value="value"
-                              label="狀態"
-                              v-model="status"
-                              outlined></v-select>
+                    <v-select :items="statusOptions" item-text="label" item-value="value" label="狀態" v-model="status"
+                        outlined></v-select>
 
                     <v-card-subtitle class="mb-4">安全資訊</v-card-subtitle>
-                    <v-text-field v-model="password"
-                                  label="密碼"
-                                  prepend-inner-icon="mdi-lock"
-                                  :type="showPassword ? 'text' : 'password'"
-                                  variant="outlined"
-                                  :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                                  @click:append-inner="showPassword = !showPassword"
-                                  :rules="requiredRule"></v-text-field>
+                    <v-text-field v-model="password" label="密碼" prepend-inner-icon="mdi-lock"
+                        :type="showPassword ? 'text' : 'password'" variant="outlined"
+                        :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                        @click:append-inner="showPassword = !showPassword" :rules="requiredRule"></v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn type="submit"
-                           color="primary"
-                           variant="outlined">提交</v-btn>
-                    <v-btn v-on:click="Close"
-                           color="secondary"
-                           variant="outlined">取消</v-btn>
+                    <v-btn type="submit" color="primary" variant="outlined" elevation="4">提交</v-btn>
+                    <v-btn v-on:click="Close" color="info" variant="outlined" elevation="4">取消</v-btn>
                     <v-spacer></v-spacer>
                 </v-card-actions>
             </v-form>

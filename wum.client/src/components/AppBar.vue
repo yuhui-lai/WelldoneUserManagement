@@ -1,5 +1,5 @@
 ﻿<template>
-    <v-app-bar color="primary" prominent>
+    <v-app-bar color="primary" prominent app>
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>使用者權限及管理系統</v-toolbar-title>
         <v-spacer></v-spacer>
@@ -20,11 +20,16 @@
         </v-menu>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" temporary>
+    <v-navigation-drawer v-model="drawer">
         <v-list>
             <v-list-item>
                 <v-btn prepend-icon="mdi-account-details" :to="'/userlist'" block>
-                    使用者列表
+                    使用者管理
+                </v-btn>
+            </v-list-item>
+            <v-list-item>
+                <v-btn prepend-icon="mdi-account-cowboy-hat" :to="'/rolelist'" block>
+                    角色管理
                 </v-btn>
             </v-list-item>
             <v-list-item>
@@ -33,7 +38,6 @@
                 </v-btn>
             </v-list-item>
         </v-list>
-
     </v-navigation-drawer>
 
 </template>

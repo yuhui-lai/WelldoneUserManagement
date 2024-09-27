@@ -20,7 +20,7 @@ namespace WUM.Lib.Services
             JWTCliam jWTCliam,
             string secretKey,
             string issuer,
-            int expireMinutes = 30
+            int expireMinutes
         )
         {
             RunStatus response = new RunStatus();

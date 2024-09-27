@@ -43,10 +43,6 @@ namespace WUM.Lib.Services
                 (string.IsNullOrEmpty(cCountry) || u.Country.Contains(cCountry))
             ).ToList();
 
-            var log = dbContext.WelldoneLog.FirstOrDefault(x=>x.Id == 63 );
-            var msg = encoder.Encode(log.LogMsg);
-
-
             return new CommAPIModel<List<UserInfoVM>>
             {
                 Data = res
@@ -61,8 +57,7 @@ namespace WUM.Lib.Services
             string cPass = req.Password.Purify(encoder);
             string cEmail = req.Email.Purify(encoder);
 
-            await SaveLog(req, cOptId, "UserInfoService CreateUser()");
-
+            await LogUtil.SaveLog(req, cOptId, "UserInfoService CreateUser()", LogLevel.Information.ToString(), dbContext);
             return new CommAPIModel<string>
             {
                 Msg = "新增成功",
@@ -78,8 +73,7 @@ namespace WUM.Lib.Services
                 DeleteId = id,
                 Req = req
             };
-            await SaveLog(delModel, cOptId, "UserInfoService DeleteUser()");
-
+            await LogUtil.SaveLog(delModel, cOptId, "UserInfoService DeleteUser()", LogLevel.Information.ToString(), dbContext);
             return new CommAPIModel<string>
             {
                 Msg = "刪除成功",
@@ -98,9 +92,8 @@ namespace WUM.Lib.Services
 
         public async Task<CommAPIModel<string>> EditUser(UserEditReq req)
         {
-            string cOptId = req.OperatorId.Purify(encoder);
-            await SaveLog(req, cOptId, "UserInfoService EditUser()");
-
+            string cOptId = req.OperatorId.Purify(encoder);           
+            await LogUtil.SaveLog(req, cOptId, "UserInfoService EditUser()", LogLevel.Information.ToString(), dbContext);
             return new CommAPIModel<string>
             {
                 Msg = "編輯成功",
@@ -157,23 +150,23 @@ namespace WUM.Lib.Services
             return vm;
         }
 
-        private async Task SaveLog<T>(T req, string operatorId, string logSource)
-        {
-            var options = new JsonSerializerOptions
-            {
-                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-            };
+        //private async Task SaveLog<T>(T req, string operatorId, string logSource)
+        //{
+        //    var options = new JsonSerializerOptions
+        //    {
+        //        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        //    };
 
-            WelldoneLog log = new WelldoneLog
-            {
-                LogDate = TimeUtil.UtcNow(),
-                LogLevel = LogLevel.Information.ToString(),
-                LogMsg = JsonSerializer.Serialize(req, options),
-                UserId = operatorId,
-                LogSource = logSource
-            };
-            await dbContext.WelldoneLog.AddAsync(log);
-            await dbContext.SaveChangesAsync();
-        }
+        //    WelldoneLog log = new WelldoneLog
+        //    {
+        //        LogDate = TimeUtil.UtcNow(),
+        //        LogLevel = LogLevel.Information.ToString(),
+        //        LogMsg = JsonSerializer.Serialize(req, options),
+        //        UserId = operatorId,
+        //        LogSource = logSource
+        //    };
+        //    await dbContext.WelldoneLog.AddAsync(log);
+        //    await dbContext.SaveChangesAsync();
+        //}
     }
 }

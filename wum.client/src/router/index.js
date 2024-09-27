@@ -13,6 +13,10 @@ const routes = [
                 component: () => import('@/pages/UserInfo/UserListPage.vue'),
             },
             {
+                path: '/rolelist',
+                component: () => import('@/pages/Role/RoleListPage.vue'),
+            },
+            {
                 path: '/hello',
                 component: () => import('@/components/HelloWorld.vue'),
             },

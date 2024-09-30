@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using WUM.Lib.Models.Common;
+using WUM.Lib.Models.DB_Context;
+using WUM.Lib.Utilities;
 
 namespace WUM.Lib.Extensions
 {
@@ -16,21 +20,27 @@ namespace WUM.Lib.Extensions
                 ExceptionHandler = async context =>
                 {
                     var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+                    string errorMsg = "";
                     if (exceptionFeature?.Error != null)
                     {
                         var logger = loggerFactory.CreateLogger("WelldoneExceptionHandler");
-                        logger.LogError(exceptionFeature.Error, exceptionFeature.Error.Message);
+                        errorMsg = exceptionFeature.Error.Message;
+                        logger.LogError(exceptionFeature.Error, errorMsg);
+                        var path = exceptionFeature.Path;
+
+                        using var dbContext = context.RequestServices.CreateScope().ServiceProvider.GetService<ManagementContext>();
+                        await LogUtil.SaveErr(errorMsg, "WelldoneExceptionHandler", path, exceptionFeature.Error.ToString(), dbContext);
                     }
 
                     context.Response.ContentType = "application/json";
                     context.Response.StatusCode = 500;
-                    var result = JsonSerializer.Serialize(new CommAPIModel<string>
+                    var jsonStr = JsonSerializer.Serialize(new CommAPIModel<string>
                     {
                         Success = false,
                         Msg = "系統忙碌中，請稍後重試",
-                        Data = "系統忙碌中，請稍後重試"
+                        Data = errorMsg
                     });
-                    await context.Response.WriteAsync(result);
+                    await context.Response.WriteAsync(jsonStr);
                 }
             });
         }

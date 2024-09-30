@@ -2,13 +2,12 @@
 {
     public class RolePermissionVM
     {
-        public int Id { get; set; }
+        public int RoleId { get; set; }
         public string RoleName { get; set; }
-        public List<RoleItemPermission> Items { get; set; }
-        public List<string> MainItems { get; set; }
+        public List<RolePermissionItem> RolePermissionItems { get; set; }
     }
 
-    public class RoleItemPermission
+    public class RolePermissionItem
     {
         public string MainItem { get; set; }
         public string SubItem { get; set; }

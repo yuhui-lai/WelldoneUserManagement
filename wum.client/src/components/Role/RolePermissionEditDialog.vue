@@ -11,15 +11,24 @@
                 </template>
                 <v-card-title>編輯權限</v-card-title>
                 <v-card-text>
-                    <v-card-subtitle class="mb-4">角色名稱 {{ reqModel.RoleName }}</v-card-subtitle>
-                    <v-data-table :headers="tableHeader" :items="reqModel.RolePermissionItems" item-key="mainItem"
+                    <v-card-subtitle class="mb-4">角色名稱 {{ reqModel.roleName }}</v-card-subtitle>
+                    <v-data-table :headers="tableHeader" :items="reqModel.rolePermissionItems" item-key="mainItem"
                         :loading="loading" fixed-header hide-default-footer :group-by="groupBy">
                         <template v-slot:group-header="{ item, columns, toggleGroup, isGroupOpen }">
                             <tr>
                                 <td :colspan="columns.length">
-                                    <VBtn :icon="isGroupOpen(item) ? '$expand' : '$next'" size="small" variant="text"
-                                        @click="toggleGroup(item)" ></VBtn>
-                                    {{ item.mainItem }}
+                                    <v-row>
+                                        <v-col cols="auto">
+                                            <VBtn :icon="isGroupOpen(item) ? '$expand' : '$next'" size="small"
+                                                variant="text" @click="toggleGroup(item)"></VBtn>
+                                            {{ item.value }}
+                                        </v-col>
+                                        <v-col cols="auto">
+                                            <v-checkbox @change="MainItemAllCheck($event, item.value)"></v-checkbox>
+                                        </v-col>
+
+                                    </v-row>
+
                                 </td>
                             </tr>
                         </template>
@@ -87,12 +96,7 @@ export default defineComponent({
                     order: 'asc',
                 },
             ],
-            reqModel: {
-                OperatorId: '',
-                RoleId: '',
-                RolePermissionItems: []
-            },
-            mainItems: [],
+            reqModel: {},
 
             showAlert: false,
             alertType: 'error',
@@ -139,7 +143,7 @@ export default defineComponent({
                 "Accept": "application/json",
                 'Authorization': `Bearer ${token}`
             };
-            this.reqModel.OperatorId = Cookies.get(import.meta.env.VITE_COOKIE_USERID);
+            this.reqModel.operatorId = Cookies.get(import.meta.env.VITE_COOKIE_USERID);
             fetch(this.editRolePermissionApi, {
                 method: "PUT",
                 headers: headers,
@@ -203,9 +207,7 @@ export default defineComponent({
                     return r.json();
                 })
                 .then(json => {
-                    this.reqModel.RoleId = this.editId;
-                    this.reqModel.RolePermissionItems = json.data.items;
-                    this.mainItems = json.data.mainItems;
+                    this.reqModel = json.data;
                     this.loading = false;
                     return;
                 }).catch(error => {
@@ -220,6 +222,18 @@ export default defineComponent({
                 showConfirmButton: false, // 隱藏確認按鈕
                 timerProgressBar: true, // 顯示進度條
                 position: 'top-end', // 移到右上角
+            });
+        },
+
+        MainItemAllCheck(event, mainItem){
+            const checked = event.target.checked;
+            this.reqModel.rolePermissionItems.forEach(i => {
+                if (i.mainItem === mainItem){
+                    i.read = checked;
+                    i.write = checked;
+                    i.delete = checked;
+                    i.export = checked;
+                }
             });
         }
     },

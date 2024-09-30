@@ -175,12 +175,11 @@ namespace WUM.Lib.Services
         {
             return new RolePermissionVM
             {
-                Id = id,
+                RoleId = id,
                 RoleName = "測試角色",
-                MainItems = ["APP"],
-                Items =
+                RolePermissionItems =
                 [
-                    new RoleItemPermission
+                    new RolePermissionItem
                     {
                         MainItem = "APP",
                         SubItem = "Users",
@@ -189,7 +188,7 @@ namespace WUM.Lib.Services
                         Delete = false,
                         Export = false
                     },
-                    new RoleItemPermission
+                    new RolePermissionItem
                     {
                         MainItem = "APP",
                         SubItem = "Order",
@@ -198,7 +197,7 @@ namespace WUM.Lib.Services
                         Delete = true,
                         Export = true
                     },
-                    new RoleItemPermission
+                    new RolePermissionItem
                     {
                         MainItem = "APP",
                         SubItem = "Test",
@@ -207,7 +206,7 @@ namespace WUM.Lib.Services
                         Delete = false,
                         Export = false
                     },
-                    new RoleItemPermission
+                    new RolePermissionItem
                     {
                         MainItem = "Web",
                         SubItem = "Users",
@@ -216,7 +215,7 @@ namespace WUM.Lib.Services
                         Delete = true,
                         Export = false
                     },
-                    new RoleItemPermission
+                    new RolePermissionItem
                     {
                         MainItem = "Web",
                         SubItem = "Order",

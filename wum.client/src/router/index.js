@@ -50,7 +50,7 @@ router.beforeEach(async (to, from, next) => {
     // 目的路由在meta上是否有設置requireAuth: true
     if (to.meta.requireAuth) {
         // 獲取Cookies當中的login資訊並取得token
-        const token = Cookies.get('login-token')
+        const token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN)
         //console.log(token)
         if (token) {
             // 如果token不為空，且確實有這個欄位則讓路由變更

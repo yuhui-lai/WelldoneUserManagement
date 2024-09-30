@@ -30,7 +30,7 @@ RUN if [ "$NODE_ENV" = "production" ]; then \
 EXPOSE 5173
 
 # 運行應用（根據環境使用不同的啟動命令）
-CMD ["npm", "run", "serve"]
+ENTRYPOINT ["npm", "run", "dev"]
 
 # Development
 # docker build --build-arg NODE_ENV=development -t wum.client:dev .

@@ -185,7 +185,7 @@
         methods: {
             GetUserInfos() {
                 this.loading = true;
-                let token = Cookies.get('login-token');
+                let token = Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN);
                 //console.log(token);
                 let headers = {
                     'Authorization': `Bearer ${token}`

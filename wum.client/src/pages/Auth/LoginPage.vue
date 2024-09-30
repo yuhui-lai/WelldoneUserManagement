@@ -165,7 +165,7 @@
                         //console.log(`token: ${token}`);
                         this.error = false;
                         this.LoginCookie(token);
-                        if (Cookies.get('login-token')) {
+                        if (Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN)) {
                             this.$router.push('/userlist')
                         }
                         this.loading = false;
@@ -254,7 +254,7 @@
                         //console.log(`token: ${token}`);
                         this.error = false;
                         this.LoginCookie(token);
-                        if (Cookies.get('login-token')) {
+                        if (Cookies.get(import.meta.env.VITE_COOKIE_LOGIN_TOKEN)) {
                             this.$router.push('/userlist')
                         }
                     })
